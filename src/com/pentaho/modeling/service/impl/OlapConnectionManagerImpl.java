@@ -41,9 +41,9 @@ import org.pentaho.platform.plugin.services.importexport.legacy.MondrianCatalogR
 import org.pentaho.platform.plugin.services.importexport.legacy.MondrianCatalogRepositoryHelper.Olap4jServerInfo;
 import org.pentaho.platform.util.messages.LocaleHelper;
 
-import com.pentaho.analyzer.content.OlapConnection;
-import com.pentaho.analyzer.service.MissingCubeMetadataException;
-import com.pentaho.analyzer.service.OlapConnectionManager;
+import com.pentaho.modeling.content.OlapConnection;
+import com.pentaho.modeling.service.MissingCubeMetadataException;
+import com.pentaho.modeling.service.OlapConnectionManager;
 
 /**
  * OlapConnectionManagerImpl manages connections to OLAP servers. Connections information is read from the
@@ -130,9 +130,9 @@ public class OlapConnectionManagerImpl extends AbstractOlapConnectionManager imp
               properties.setProperty( "password", si.password );
             }
             log.info(
-              "Opening olap4j datasource with name=" + catalogName
-              + ",driver=" + si.className
-              + ",url=" + url );
+                "Opening olap4j datasource with name=" + catalogName
+                + ",driver=" + si.className
+                + ",url=" + url );
           }
         }
       }

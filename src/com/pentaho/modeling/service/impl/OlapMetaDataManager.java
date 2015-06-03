@@ -22,20 +22,19 @@
 
 package com.pentaho.modeling.service.impl;
 
-import com.pentaho.analyzer.service.modeling.AnnotationResult;
+import com.pentaho.modeling.AnnotationResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.olap4j.OlapException;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.platform.api.engine.ICacheManager;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
 import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.action.mondrian.catalog.MondrianCatalogHelper;
 
-import com.pentaho.analyzer.content.OlapConnection;
-import com.pentaho.analyzer.service.CVAppContext;
-import com.pentaho.analyzer.service.IModelingServiceFacade;
-import com.pentaho.analyzer.service.OlapConnectionManager;
+import com.pentaho.modeling.content.OlapConnection;
+import com.pentaho.modeling.service.CVAppContext;
+import com.pentaho.modeling.service.IModelingServiceFacade;
+import com.pentaho.modeling.service.OlapConnectionManager;
 
 /**
  * OlapMetDataManager provides access to OLAP metadata including the cubes and fields the user has access to. The
@@ -67,7 +66,7 @@ public class OlapMetaDataManager implements java.io.Serializable {
     return olapConnectionManager.getConnection( catalogName );
   }
 
-  public OlapConnection getConnection( String catalogName, String schema ){
+  public OlapConnection getConnection( String catalogName, String schema ) {
     return olapConnectionManager.getConnection( catalogName, schema );
   }
 
@@ -93,26 +92,6 @@ public class OlapMetaDataManager implements java.io.Serializable {
     olapConnectionManager.clearMondrianCache( oc.getCatalog() );
     ICacheManager cacheMgr = PentahoSystem.getCacheManager( PentahoSessionHolder.getSession() );
     cacheMgr.removeFromRegionCache( MondrianCatalogHelper.MONDRIAN_CATALOG_CACHE_REGION, oc.getKey() );
-  }
-
-  /**
-   * @param oc
-   * @return HelpGenerator
-   */
-  public HelpGenerator getHelpGenerator( OlapConnection oc ) {
-    String key = oc.getKey();
-    ICacheManager cacheMgr = PentahoSystem.getCacheManager( PentahoSessionHolder.getSession() );
-    HelpGenerator helpGenerator =
-        (HelpGenerator) cacheMgr.getFromRegionCache( MondrianCatalogHelper.MONDRIAN_CATALOG_CACHE_REGION, key );
-    if ( helpGenerator == null ) {
-      try {
-        helpGenerator = new HelpGenerator( oc.getConnection() );
-      } catch ( OlapException e ) {
-        throw new RuntimeException( e );
-      }
-      cacheMgr.putInRegionCache( MondrianCatalogHelper.MONDRIAN_CATALOG_CACHE_REGION, key, helpGenerator );
-    }
-    return helpGenerator;
   }
 
   public void setCVAppContext( CVAppContext appContext ) {

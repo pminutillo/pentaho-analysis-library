@@ -53,7 +53,7 @@ public class AgileBIOlapConnectionManager extends AbstractOlapConnectionManager 
   /**
    * Directly uses MDXOlap4jConnection to get a Mondrian connection.
    * 
-   * @param oc
+   * @param catalogName
    * @return
    */
   protected OlapConnection createConnection( String catalogName ) {

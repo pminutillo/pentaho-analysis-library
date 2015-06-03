@@ -29,8 +29,7 @@ import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.util.logging.SimpleLogger;
 
 import com.pentaho.modeling.content.OlapConnection;
-import com.pentaho.analyzer.service.CVAppContext;
-import com.pentaho.analyzer.service.ILocalizationService;
+import com.pentaho.modeling.service.CVAppContext;
 
 /**
  * This is an abstract class used by implementing connection managers
@@ -43,7 +42,6 @@ import com.pentaho.analyzer.service.ILocalizationService;
 public abstract class AbstractOlapConnectionManager {
 
   CVAppContext appContext;
-  ILocalizationService ls;
 
   private static ILogger log = new SimpleLogger( AbstractOlapConnectionManager.class.getName() );
 
@@ -75,7 +73,7 @@ public abstract class AbstractOlapConnectionManager {
    * Gets a native Mondrian RolapConnection. The connect string (including the catalog and datasource) is the same as
    * what JPivot/AnalysisViews uses so this results in Analyzer and JPivot sharing the same RolapSchema/cache.
    * 
-   * @param oc
+   * @param catalogName
    * @return
    */
   protected abstract OlapConnection createConnection( String catalogName );
@@ -84,7 +82,4 @@ public abstract class AbstractOlapConnectionManager {
     this.appContext = appContext;
   }
 
-  public void setLocalizationService( ILocalizationService ls ) {
-    this.ls = ls;
-  }
 }
