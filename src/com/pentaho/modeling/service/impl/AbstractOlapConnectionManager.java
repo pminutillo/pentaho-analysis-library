@@ -29,7 +29,6 @@ import org.pentaho.platform.api.engine.ILogger;
 import org.pentaho.platform.util.logging.SimpleLogger;
 
 import com.pentaho.modeling.content.OlapConnection;
-import com.pentaho.modeling.service.CVAppContext;
 
 /**
  * This is an abstract class used by implementing connection managers
@@ -40,8 +39,6 @@ import com.pentaho.modeling.service.CVAppContext;
  * @updated $DateTime: $
  */
 public abstract class AbstractOlapConnectionManager {
-
-  CVAppContext appContext;
 
   private static ILogger log = new SimpleLogger( AbstractOlapConnectionManager.class.getName() );
 
@@ -77,9 +74,5 @@ public abstract class AbstractOlapConnectionManager {
    * @return
    */
   protected abstract OlapConnection createConnection( String catalogName );
-
-  public void setCVAppContext( CVAppContext appContext ) {
-    this.appContext = appContext;
-  }
 
 }

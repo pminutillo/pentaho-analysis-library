@@ -32,7 +32,6 @@ import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.platform.plugin.action.mondrian.catalog.MondrianCatalogHelper;
 
 import com.pentaho.modeling.content.OlapConnection;
-import com.pentaho.modeling.service.CVAppContext;
 import com.pentaho.modeling.service.IModelingServiceFacade;
 import com.pentaho.modeling.service.OlapConnectionManager;
 
@@ -51,7 +50,6 @@ public class OlapMetaDataManager implements java.io.Serializable {
   private static Log log = LogFactory.getLog( OlapMetaDataManager.class );
 
   OlapConnectionManager olapConnectionManager;
-  CVAppContext appContext;
   IModelingServiceFacade modelingService;
 
   public OlapMetaDataManager() {
@@ -92,10 +90,6 @@ public class OlapMetaDataManager implements java.io.Serializable {
     olapConnectionManager.clearMondrianCache( oc.getCatalog() );
     ICacheManager cacheMgr = PentahoSystem.getCacheManager( PentahoSessionHolder.getSession() );
     cacheMgr.removeFromRegionCache( MondrianCatalogHelper.MONDRIAN_CATALOG_CACHE_REGION, oc.getKey() );
-  }
-
-  public void setCVAppContext( CVAppContext appContext ) {
-    this.appContext = appContext;
   }
 
   public void setModelingService( IModelingServiceFacade modelingService ) {

@@ -29,6 +29,7 @@ import mondrian.rolap.RolapConnectionProperties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.commons.connection.IPentahoConnection;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
 import org.pentaho.platform.engine.core.system.PentahoSessionHolder;
@@ -101,58 +102,39 @@ public class OlapConnectionManagerImpl extends AbstractOlapConnectionManager imp
       properties.setProperty( "url", url );
       properties.setProperty( "driver", "mondrian.olap4j.MondrianOlap4jDriver" );
 
-    } else {
-      // Try to make a connection using the url and driver specified in analyzer.properties
-      // This mechanism allows Analyzer to create Mondrian connections without the use of
-      // MondrianCatalogHelper
-      String customDSName = appContext.getProperty( OlapConnection.CUSTOM_DATASOURCE_NAME );
-      if ( catalogName.equals( customDSName ) ) {
-        url = appContext.getProperty( OlapConnection.CUSTOM_DATASOURCE_URL );
-        String driver = appContext.getProperty( OlapConnection.CUSTOM_DATASOURCE_DRIVER );
-        properties.setProperty( "url", url );
-        properties.setProperty( "driver", driver );
-        log.info( "Opening custom datasource with name=" + customDSName + ",driver=" + driver + ",url=" + url );
-
-      } else {
-          // Check the MondrianCatalogRepositoryHelper
-        final IUnifiedRepository repo = PentahoSystem.get( IUnifiedRepository.class, null );
-        if ( repo != null ) {
-          final MondrianCatalogRepositoryHelper helper = new MondrianCatalogRepositoryHelper( repo );
-          if ( helper.getOlap4jServers().contains( catalogName ) ) {
-            final Olap4jServerInfo si = helper.getOlap4jServerInfo( catalogName );
-            url = si.URL;
-            properties.setProperty( "url", url );
-            properties.setProperty( "driver", si.className );
-            if ( si.user != null ) {
-              properties.setProperty( "user", si.user );
-            }
-            if ( si.password != null ) {
-              properties.setProperty( "password", si.password );
-            }
-            log.info(
-                "Opening olap4j datasource with name=" + catalogName
-                + ",driver=" + si.className
-                + ",url=" + url );
-          }
-        }
-      }
     }
 
     if ( url == null ) {
       throw new MissingCubeMetadataException( "Unable to find catalog: " + catalogName );
     }
 
+    return getConnectionWithProperties( properties );
+  }
+
+  /**
+   * get MDX OLAP Connection using specified properties
+   *
+   * @param properties
+   * @return
+   */
+  private OlapConnection getConnectionWithProperties( Properties properties ) {
     MDXOlap4jConnection connection =
-        (MDXOlap4jConnection) PentahoConnectionFactory.getConnection( IPentahoConnection.MDX_OLAP4J_DATASOURCE,
-            properties, PentahoSessionHolder.getSession(), null );
+      (MDXOlap4jConnection) PentahoConnectionFactory.getConnection( IPentahoConnection.MDX_OLAP4J_DATASOURCE,
+        properties, PentahoSessionHolder.getSession(), null );
 
     if ( connection == null || !connection.initialized() ) {
-      throw new RuntimeException( "Unable to get connnection " + url );
+      throw new RuntimeException( "Unable to get connnection " + properties.getProperty( "url" ) );
     }
 
-    OlapConnection oc = new OlapConnection( catalogName, url, connection.getConnection() );
-    log.info( "Opened olap4j connection with user=" + PentahoSessionHolder.getSession().getName() + ",url=" + url
-        + ",cacheKey=" + oc.getKey() );
+    OlapConnection oc = new OlapConnection(
+      properties.getProperty( RolapConnectionProperties.Catalog.name() ),
+      properties.getProperty( "url" ),
+      connection.getConnection() );
+
+    log.info( "Opened olap4j connection with user="
+      + PentahoSessionHolder.getSession().getName()
+      + ",url=" + properties.getProperty( "url" )
+      + ",cacheKey=" + oc.getKey() );
 
     return oc;
   }
@@ -160,4 +142,66 @@ public class OlapConnectionManagerImpl extends AbstractOlapConnectionManager imp
   public OlapConnection getConnection( String catalogName, String schema ) {
     return createConnection( catalogName, schema );
   }
+
+  public OlapConnection getConnection( String catalogName, String datasourceName, String datasourceURL, String datasourceDriver ){
+    // Try to make a connection using the url and driver specified in analyzer.properties
+    // This mechanism allows Analyzer to create Mondrian connections without the use of
+    // MondrianCatalogHelper
+
+    Properties properties = new Properties();
+    if ( catalogName.equals( datasourceName ) ) {
+      properties.setProperty( "url", datasourceURL );
+      properties.setProperty( "driver", datasourceDriver );
+      log.info( "Opening custom datasource with name=" + catalogName + ",driver=" + datasourceDriver + ",url=" + datasourceURL );
+
+    } else {
+      // Check the MondrianCatalogRepositoryHelper
+      final IUnifiedRepository repo = PentahoSystem.get( IUnifiedRepository.class, null );
+      if ( repo != null ) {
+        final MondrianCatalogRepositoryHelper helper = new MondrianCatalogRepositoryHelper( repo );
+        if ( helper.getOlap4jServers().contains( catalogName ) ) {
+          final Olap4jServerInfo si = helper.getOlap4jServerInfo( catalogName );
+          datasourceURL = si.URL;
+          properties.setProperty( "url", datasourceURL );
+          properties.setProperty( "driver", si.className );
+          if ( si.user != null ) {
+            properties.setProperty( "user", si.user );
+          }
+          if ( si.password != null ) {
+            properties.setProperty( "password", si.password );
+          }
+          log.info(
+            "Opening olap4j datasource with name=" + catalogName
+              + ",driver=" + si.className
+              + ",url=" + datasourceURL );
+        }
+      }
+    }
+
+    return getConnectionWithProperties( properties );
+  }
+
+//
+//  /**
+//   * Returns a new OlapConnection which will always open a new Olap4j connection. The Olap4j connection may
+//   * internally share the same RolapSchema.
+//   *
+//   * @param catalogName
+//   * @return
+//   */
+//  public OlapConnection createOlapConnection( String catalogName ) {
+//    return olapMetadataManager.getConnection( catalogName );
+//  }
+//
+//  /**
+//   * Returns a new OlapConnection based on a model that been modified by annotations.
+//   *
+//   * @param catalogName
+//   * @param annotations
+//   * @return
+//   */
+//  public OlapConnection createOlapConnection( String catalogName, ModelAnnotationGroup annotations ) {
+//    return olapMetadataManager.getConnection( catalogName, annotations );
+//  }
+
 }
